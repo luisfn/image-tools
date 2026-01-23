@@ -1,0 +1,22 @@
+# Images
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tiff
+*.tif
+*.webp
+*.svg
+*.ico
+*.heic
+*.heif
+*.avif
+*.raw
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
