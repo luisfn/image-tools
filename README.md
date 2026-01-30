@@ -68,6 +68,41 @@ python3 enhance_screenshot.py screenshot.png --no-frame
 python3 enhance_screenshot.py screenshot.png --no-shadow
 ```
 
+### convert_image.py
+
+Quickly convert images between different formats (e.g., PNG to WebP).
+
+**Usage:**
+
+```bash
+./convert_image.py <input> [output] [options]
+```
+
+If no output path or format is provided, it defaults to converting to WebP and saves as `<input_name>.webp`.
+
+**Options:**
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `-f`, `--format` | Target format (webp, png, jpeg) | `webp` (if no output) |
+| `-q`, `--quality` | Quality (1-100) for lossy formats | `80` |
+
+**Examples:**
+
+```bash
+# Convert to WebP (default)
+./convert_image.py image.png
+
+# Convert to specific format
+./convert_image.py image.png -f jpeg
+
+# Convert with specific output name
+./convert_image.py image.png final_version.webp
+
+# Convert with high quality
+./convert_image.py photo.png -f webp -q 95
+```
+
 ## Requirements
 
 - Python 3.8+
