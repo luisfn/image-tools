@@ -20,3 +20,12 @@ __pycache__/
 *.pyo
 .venv/
 venv/
+*.egg-info/
+dist/
+build/
+
+# macOS
+.DS_Store
+
+# rembg model cache
+.u2net/
