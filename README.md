@@ -25,6 +25,7 @@ make enhance INPUT=<file> [OUTPUT=<file>] [ARGS="..."]
 make remove-bg INPUT=<file> [OUTPUT=<file>] [ARGS="..."]
 make vectorize INPUT=<file> [OUTPUT=<file>] [ARGS="..."]
 make convert INPUT=<file> [OUTPUT=<file>] [ARGS="..."]
+make crop INPUT=<file> [OUTPUT=<file>] [ARGS="..."]
 ```
 
 **Examples:**
@@ -56,6 +57,12 @@ make convert INPUT=./photo.png
 
 # Convert to JPEG with high quality
 make convert INPUT=./photo.png OUTPUT=./photo.jpg ARGS="-f jpeg -q 95"
+
+# Auto-crop image to content area
+make crop INPUT=~/Desktop/logo.png
+
+# Auto-crop with padding around content
+make crop INPUT=~/Desktop/logo.png ARGS="-p 20"
 ```
 
 Remove the Docker image:
@@ -157,6 +164,41 @@ If no output path or format is provided, it defaults to converting to WebP and s
 
 # Convert with high quality
 ./convert_image.py photo.png -f webp -q 95
+```
+
+### crop_image.py
+
+Auto-crops images by detecting the meaningful content area. Works with transparent images (detects non-transparent pixels) and opaque images (detects background color from corners).
+
+**Usage:**
+
+```bash
+python3 crop_image.py <input> [output] [options]
+```
+
+If no output path is provided, saves as `<input_name>_cropped.png`.
+
+**Options:**
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `-p`, `--padding` | Extra padding around content in px | `0` |
+| `-t`, `--tolerance` | Color tolerance for background detection | `10` |
+
+**Examples:**
+
+```bash
+# Auto-crop to content area
+python3 crop_image.py logo.png
+
+# Crop with padding around content
+python3 crop_image.py logo.png -p 20
+
+# Higher tolerance for gradient backgrounds
+python3 crop_image.py image.png -t 30
+
+# Specify output path
+python3 crop_image.py logo.png cropped_logo.png -p 10
 ```
 
 ### remove_bg.py

@@ -1,7 +1,7 @@
 IMAGE_NAME := image-tools
 DOCKER_RUN := docker run --rm -v "$(HOME):$(HOME)" -w "$(PWD)" $(IMAGE_NAME)
 
-.PHONY: build clean enhance remove-bg vectorize convert
+.PHONY: build clean enhance remove-bg vectorize convert crop
 
 build:
 	docker build -t $(IMAGE_NAME) .
@@ -24,3 +24,7 @@ vectorize:
 # Usage: make convert INPUT=image.png [OUTPUT=image.webp] [ARGS="-q 90"]
 convert:
 	$(DOCKER_RUN) /app/convert_image.py $(INPUT) $(OUTPUT) $(ARGS)
+
+# Usage: make crop INPUT=image.png [OUTPUT=cropped.png] [ARGS="-p 10"]
+crop:
+	$(DOCKER_RUN) /app/crop_image.py $(INPUT) $(OUTPUT) $(ARGS)
