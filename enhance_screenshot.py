@@ -124,9 +124,12 @@ def parse_color(color_str):
 
 
 def enhance_screenshot(input_path, output_path, gradient_name="purple-blue",
-                       color_start=None, color_end=None, padding=80,
-                       corner_radius=12, no_frame=False, no_shadow=False):
+                       color_start=None, color_end=None, padding=None,
+                       corner_radius=12, no_frame=False, no_shadow=False,
+                       square=False):
     """Enhance a screenshot with frame, shadow, and gradient background."""
+    if padding is None:
+        padding = 40 if square else 80
     screenshot = Image.open(input_path).convert("RGBA")
     print(f"Input: {screenshot.width}x{screenshot.height}")
 
@@ -146,11 +149,14 @@ def enhance_screenshot(input_path, output_path, gradient_name="purple-blue",
 
     bg_width = image.width + padding * 2
     bg_height = image.height + padding * 2
+    if square:
+        bg_width = bg_height = max(bg_width, bg_height)
 
     print(f"Generating gradient ({gradient_name})...")
     background = create_gradient(bg_width, bg_height, start, end)
 
-    background.paste(image, (padding, padding), image)
+    position = ((bg_width - image.width) // 2, (bg_height - image.height) // 2)
+    background.paste(image, position, image)
     background.save(output_path, "PNG", optimize=True)
     print(f"Output: {output_path} ({bg_width}x{bg_height})")
 
@@ -169,10 +175,11 @@ def main():
     )
     parser.add_argument("--color-start", type=parse_color, help="Custom start color as R,G,B")
     parser.add_argument("--color-end", type=parse_color, help="Custom end color as R,G,B")
-    parser.add_argument("-p", "--padding", type=int, default=80, help="Padding around the image (default: 80)")
+    parser.add_argument("-p", "--padding", type=int, default=None, help="Padding around the image (default: 80, or 40 with --square)")
     parser.add_argument("-r", "--radius", type=int, default=12, help="Corner radius (default: 12)")
     parser.add_argument("--no-frame", action="store_true", help="Skip browser frame")
     parser.add_argument("--no-shadow", action="store_true", help="Skip drop shadow")
+    parser.add_argument("--square", action="store_true", help="Expand the background to a square without resizing the image")
     parser.add_argument("--list-gradients", action="store_true", help="List available gradient presets")
 
     args = parser.parse_args()
@@ -201,6 +208,7 @@ def main():
         corner_radius=args.radius,
         no_frame=args.no_frame,
         no_shadow=args.no_shadow,
+        square=args.square,
     )
 
 

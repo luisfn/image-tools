@@ -79,7 +79,77 @@ def get_content_bbox(image, tolerance=0):
     return diff.getbbox()
 
 
-def crop_image(input_path, output_path=None, padding=0, tolerance=10):
+def parse_ratio(ratio_str):
+    """
+    Parse a ratio string like '16:9' or '4:3' into a float (width/height).
+
+    Args:
+        ratio_str: String in the format 'W:H'
+
+    Returns:
+        float: The aspect ratio as width / height
+    """
+    parts = ratio_str.split(':')
+    if len(parts) != 2:
+        raise ValueError(f"Invalid ratio format '{ratio_str}'. Use W:H (e.g. 16:9)")
+    w, h = float(parts[0]), float(parts[1])
+    if w <= 0 or h <= 0:
+        raise ValueError("Ratio values must be positive numbers")
+    return w / h
+
+
+def apply_ratio(bbox, image_size, target_ratio):
+    """
+    Adjust a bounding box to match the target aspect ratio.
+
+    First tries to expand the box. If the image is too small to fit the
+    expanded dimension, shrinks the other dimension instead.
+
+    Args:
+        bbox: (left, upper, right, lower) bounding box
+        image_size: (width, height) of the full image
+        target_ratio: desired width/height ratio
+
+    Returns:
+        tuple: adjusted (left, upper, right, lower) bounding box
+    """
+    left, upper, right, lower = bbox
+    img_w, img_h = image_size
+
+    # Find the largest rectangle with the target ratio that fits in the image
+    final_w = img_w
+    final_h = int(img_w / target_ratio)
+    if final_h > img_h:
+        final_h = img_h
+        final_w = int(img_h * target_ratio)
+
+    # Center the box around the content center
+    cx = (left + right) // 2
+    cy = (upper + lower) // 2
+
+    left = cx - final_w // 2
+    right = left + final_w
+    upper = cy - final_h // 2
+    lower = upper + final_h
+
+    # Clamp to image bounds, shifting if possible
+    if left < 0:
+        right = min(img_w, right - left)
+        left = 0
+    if upper < 0:
+        lower = min(img_h, lower - upper)
+        upper = 0
+    if right > img_w:
+        left = max(0, left - (right - img_w))
+        right = img_w
+    if lower > img_h:
+        upper = max(0, upper - (lower - img_h))
+        lower = img_h
+
+    return (left, upper, right, lower)
+
+
+def crop_image(input_path, output_path=None, padding=0, tolerance=10, ratio=None):
     """
     Auto-crop an image to its meaningful content area.
 
@@ -88,6 +158,7 @@ def crop_image(input_path, output_path=None, padding=0, tolerance=10):
         output_path (str): Path to the output image. If None, derived from input.
         padding (int): Extra padding around the detected content (default: 0).
         tolerance (int): Color tolerance for background detection (default: 10).
+        ratio (str): Target aspect ratio in W:H format (e.g. '16:9'). Optional.
     """
     try:
         input_file = Path(input_path).expanduser()
@@ -127,6 +198,13 @@ def crop_image(input_path, output_path=None, padding=0, tolerance=10):
         right = min(width, right + padding)
         lower = min(height, lower + padding)
 
+        # Apply aspect ratio if requested
+        if ratio:
+            target_ratio = parse_ratio(ratio)
+            left, upper, right, lower = apply_ratio(
+                (left, upper, right, lower), image.size, target_ratio
+            )
+
         # Crop the image
         cropped = image.crop((left, upper, right, lower))
 
@@ -162,10 +240,12 @@ def main():
                         help="Extra padding around detected content in px (default: 0)")
     parser.add_argument("-t", "--tolerance", type=int, default=10,
                         help="Color tolerance for background detection (default: 10)")
+    parser.add_argument("-r", "--ratio", type=str, default=None,
+                        help="Target aspect ratio in W:H format (e.g. 16:9, 4:3, 1:1)")
 
     args = parser.parse_args()
 
-    crop_image(args.input, args.output, args.padding, args.tolerance)
+    crop_image(args.input, args.output, args.padding, args.tolerance, args.ratio)
 
 
 if __name__ == "__main__":

@@ -92,10 +92,11 @@ If no output path is provided, saves as `<input_name>_enhanced.png`.
 | `-g`, `--gradient` | Gradient preset name | `purple-blue` |
 | `--color-start` | Custom start color (R,G,B) | — |
 | `--color-end` | Custom end color (R,G,B) | — |
-| `-p`, `--padding` | Padding around image in px | `80` |
+| `-p`, `--padding` | Minimum padding around image in px; overrides the default | `80` (`40` with `--square`) |
 | `-r`, `--radius` | Corner radius in px | `12` |
 | `--no-frame` | Skip browser frame | — |
 | `--no-shadow` | Skip drop shadow | — |
+| `--square` | Square background, preserving image dimensions and centering it | — |
 | `--list-gradients` | Show available presets | — |
 
 **Gradient Presets:**
@@ -120,6 +121,9 @@ python3 enhance_screenshot.py screenshot.png social_post.png
 
 # Sunset gradient with extra padding
 python3 enhance_screenshot.py screenshot.png -g sunset -p 120
+
+# Square background without resizing the screenshot (minimum 40 px padding on each side)
+make enhance INPUT=screenshot.png ARGS="--square"
 
 # Custom gradient colors
 python3 enhance_screenshot.py screenshot.png --color-start 20,20,40 --color-end 60,60,120
